@@ -29,13 +29,6 @@ const AdminDashboard = () => {
     fetchStats();
   }, []);
 
-  useEffect(() => {
-    document.body.classList.add('admin-dashboard-page');
-    return () => {
-      document.body.classList.remove('admin-dashboard-page');
-    };
-  }, []);
-
   return (
     <div>
       <div style={{ marginBottom: '2rem' }}>
