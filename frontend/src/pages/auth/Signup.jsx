@@ -9,8 +9,7 @@ const Signup = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    address: ''
+    confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -19,7 +18,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const { name, email, password, confirmPassword, address } = formData;
+  const { name, email, password, confirmPassword } = formData;
 
   // Validation conditions
   const isNameValid = name.trim().length >= 20 && name.trim().length <= 60;
@@ -29,7 +28,6 @@ const Signup = () => {
   const hasPasswordSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
   const isPasswordValid = hasPasswordMinLength && hasPasswordUppercase && hasPasswordSpecialChar;
   const isConfirmPasswordMatch = password === confirmPassword && confirmPassword.length > 0;
-  const isAddressValid = address.length <= 400;
 
   const handleChange = (e) => {
     const { name: fieldName, value } = e.target;
@@ -55,9 +53,6 @@ const Signup = () => {
     if (password !== confirmPassword) {
       errs.confirmPassword = 'Passwords do not match';
     }
-    if (!isAddressValid) {
-      errs.address = 'Address must not exceed 400 characters';
-    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -71,8 +66,7 @@ const Signup = () => {
       const newUser = await signup({
         name: name.trim(),
         email: email.trim(),
-        password,
-        address: address.trim() || undefined
+        password
       });
       showToast(`Account created successfully! Welcome, ${newUser.name}.`, 'success');
       navigate('/stores', { replace: true });
@@ -150,30 +144,7 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Address */}
-          <div className="form-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label className="form-label" htmlFor="signup-address" style={{ margin: 0 }}>Address (Optional)</label>
-              <span style={{ fontSize: '0.75rem', color: isAddressValid ? 'var(--text-muted)' : 'var(--danger)' }}>
-                {address.length}/400
-              </span>
-            </div>
-            <textarea
-              id="signup-address"
-              name="address"
-              rows={2}
-              className={`form-textarea ${errors.address ? 'is-invalid' : ''}`}
-              placeholder="Enter your street address, city, state, zip code"
-              value={address}
-              onChange={handleChange}
-              maxLength={400}
-            />
-            {errors.address && (
-              <div className="form-error">
-                <AlertCircle size={14} /> {errors.address}
-              </div>
-            )}
-          </div>
+
 
           {/* Password */}
           <div className="form-group">
@@ -245,7 +216,7 @@ const Signup = () => {
             type="submit"
             className="btn btn-primary"
             style={{ width: '100%', marginTop: '0.75rem', padding: '0.85rem' }}
-            disabled={loading || !isNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordMatch}
+            disabled={loading}
           >
             {loading ? 'Creating Account...' : 'Create Account'} <ArrowRight size={16} />
           </button>

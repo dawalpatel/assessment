@@ -9,6 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -17,18 +18,57 @@ const Login = () => {
 
   const from = location.state?.from?.pathname;
 
+  // Validation conditions matching Signup.jsx
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const hasPasswordMinLength = password.length >= 8 && password.length <= 16;
+  const hasPasswordUppercase = /[A-Z]/.test(password);
+  const hasPasswordSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  const isPasswordValid = hasPasswordMinLength && hasPasswordUppercase && hasPasswordSpecialChar;
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (errors.email) {
+      setErrors((prev) => ({ ...prev, email: null }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (errors.password) {
+      setErrors((prev) => ({ ...prev, password: null }));
+    }
+  };
+
+  const validateForm = () => {
+    const errs = {};
+    if (!email.trim()) {
+      errs.email = 'Email is required';
+    } else if (!isEmailValid) {
+      errs.email = 'Please provide a valid email address';
+    }
+
+    if (!password) {
+      errs.password = 'Password is required';
+    } else if (!isPasswordValid) {
+      errs.password = 'Password must meet all complexity requirements';
+    }
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setErrors({});
 
-    if (!email || !password) {
-      setError('Please fill in both email and password');
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
     try {
-      const loggedInUser = await login(email, password);
+      const loggedInUser = await login(email.trim(), password);
       showToast(`Welcome back, ${loggedInUser.name}!`, 'success');
 
       if (from) {
@@ -68,6 +108,7 @@ const Login = () => {
       setPassword('Owner@123');
     }
     setError('');
+    setErrors({});
   };
 
   return (
@@ -107,14 +148,19 @@ const Login = () => {
               <input
                 id="login-email"
                 type="email"
-                className="form-input"
+                className={`form-input ${errors.email ? 'is-invalid' : ''}`}
                 placeholder="name@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 required
                 autoComplete="new-password"
               />
             </div>
+            {errors.email && (
+              <div className="form-error">
+                <AlertCircle size={14} /> {errors.email}
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -123,14 +169,19 @@ const Login = () => {
               <input
                 id="login-password"
                 type="password"
-                className="form-input"
+                className={`form-input ${errors.password ? 'is-invalid' : ''}`}
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 required
                 autoComplete="new-password"
               />
             </div>
+            {errors.password && (
+              <div className="form-error">
+                <AlertCircle size={14} /> {errors.password}
+              </div>
+            )}
           </div>
 
           <button
